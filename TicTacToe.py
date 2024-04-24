@@ -26,12 +26,24 @@ class TicTacToe:
                                                                 2's for player 2 has played here
         """
         return self.__board
-    
+
+
+    def getBoardSize(self) -> int:
+        """returns the size of the board - Ben"""
+        return len(self.__board)
+
     
     def __initializeBoard(self, length:int, width:int):
         '''Initializes a multidimensional array for tracking moves by each player, allows for variable board size'''
         self.__board = [[0 for j in range(width)] for i in range(length)]
     
+    def checkValidMove(self, posX:int, posY:int) -> bool:
+        """check if the space is taken for attempted move -Ben"""
+        if self.__board[posY][posX] != 0:
+            return False
+        else:
+            return True
+
     def takeTurn(self, player:int, posX:int, posY:int):
         
         """function for a player to take thier turn and make their mark
@@ -47,15 +59,15 @@ class TicTacToe:
         else:
             raise ValueError(f"It is player {self.turn}'s turn! not player {player}'s!")
         
-        self.checkWin(posX, posY)
-        self.changeTurn()
+        # self.checkWin(posX, posY)
+        # self.changeTurn()
         
     def changeTurn(self):
         """changes which player's turn it is
         """
         if(self.turn == 1):
             self.turn = 2
-        else: self._turn = 1
+        else: self.turn = 1
         
     def checkWin(self, posX:int, posY:int) -> bool:
         """Checks if the board is in a winning state, raises ??? something, not sure what yet
@@ -70,7 +82,14 @@ class TicTacToe:
             #if any of the 3 possible win conditions are true then return True
             return True
         else: return False
-    
+
+    def checkTie(self, posX:int, posY:int) -> bool:
+        """checks for a tie condition - Ben"""
+        if 0 not in (item for sublist in self.__board for item in sublist) and not self.checkWin(posX, posY):
+            return True
+        else:
+            return False
+
     def __checkWinRow(self, posY:int) -> bool:
         """checks if there is a row-based victory for the player whose turn it is
 
