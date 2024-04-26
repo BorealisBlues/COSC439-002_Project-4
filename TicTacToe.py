@@ -1,5 +1,8 @@
 #Class definition for internal game logic
 
+class GameEndException(Exception):
+    """To be raised upon game win with int value 0 for Tie, 1 for player 1 victory, 2 for player 2 victory """ 
+
 class TicTacToe:
     """class representing the actual game
     """
@@ -27,19 +30,17 @@ class TicTacToe:
         """
         return self.__board
 
-
     def getBoardSize(self) -> int:
         """returns the size of the board - Ben"""
         return len(self.__board)
 
-    
     def __initializeBoard(self, length:int, width:int):
         '''Initializes a multidimensional array for tracking moves by each player, allows for variable board size'''
         self.__board = [[0 for j in range(width)] for i in range(length)]
     
     def checkValidMove(self, posX:int, posY:int) -> bool:
         """check if the space is taken for attempted move -Ben"""
-        if self.__board[posX][posY] != 0:
+        if self.__board[posY][posX] != 0: #Swapped for intuitive display and storage, even if it leads to unintuitive access
             return False
         else:
             return True
@@ -48,6 +49,10 @@ class TicTacToe:
         
         """function for a player to take thier turn and make their mark
         Throws ValueError on wrong turn
+        
+        Raises:
+            ValueError: for invalid move (wrong player or occupied space)
+            GameEndException: game is now over, either victory for player 1/2, or tie (0)
 
         Args:
             player (int): the player (1 or 2) who is taking their turn
@@ -55,12 +60,20 @@ class TicTacToe:
             posY (int): vertical position in the board where the player is playing
         """
         if(self.turn == player): # check if it is the players turn
-            self.__board[posX][posY] = player
+            if self.checkValidMove(posX, posY):
+                self.__board[posY][posX] = player #Y and X are swapped for consistent and intuitive display,
+                                                  #even if it reads a little unintuitively
+            else:
+                raise ValueError(f"Position at X: {posX} Y: {posY} is alredy taken!")
         else:
             raise ValueError(f"It is player {self.turn}'s turn! not player {player}'s!")
         
-        # self.checkWin(posX, posY)
-        # self.changeTurn()
+        if self.checkWin(posX, posY):
+            raise GameEndException(self.turn)
+        elif self.checkTie(posX, posY):
+            raise GameEndException(0)
+        else:   
+            self.changeTurn()
         
     def changeTurn(self):
         """changes which player's turn it is
@@ -78,7 +91,7 @@ class TicTacToe:
         Returns:
             bool: whether or not there is a victory for the player whose turn it is
         """
-        if(self.__checkWinRow(posY) or self.__checkWinColumn(posX) or self.__checkWinDiagonal()):
+        if(self.__checkWinRow(posX) or self.__checkWinColumn(posY) or self.__checkWinDiagonal()):
             #if any of the 3 possible win conditions are true then return True
             return True
         else: return False
@@ -90,7 +103,7 @@ class TicTacToe:
         else:
             return False
 
-    def __checkWinRow(self, posY:int) -> bool:
+    def __checkWinRow(self, posX:int) -> bool:
         """checks if there is a row-based victory for the player whose turn it is
 
         Args:
@@ -102,12 +115,12 @@ class TicTacToe:
         victory = True
         
         for spot in self.__board:
-            if not (spot[posY] == self.turn):
+            if not (spot[posX] == self.turn):
                 victory = False
             
         return victory
     
-    def __checkWinColumn(self, posX:int) -> bool:
+    def __checkWinColumn(self, posY:int) -> bool:
         """checks for a Column win at current horizontal position
 
         Args:
@@ -118,7 +131,7 @@ class TicTacToe:
         """
         victory = True
         
-        for spot in self.__board[posX]:
+        for spot in self.__board[posY]:
             if not (spot == self.turn):
                 victory = False
         return victory
@@ -170,14 +183,27 @@ class TicTacToe:
         
 def testGame():
     game = TicTacToe()
-    
     while(True):
-        print(f"welcome to ticTacToe! Current turn is player {game.turn}'s")
-        print(game)
-        player = int(input("Please enter which player you are, 1 or 2!"))
-        posX = int(input(f"Please enter the X Position that player {player} wishes to play at :"))
-        posY = int(input("Thank you! now please enter the Y Position! :"))
-        game.takeTurn(player, posX, posY)
+        try:
+            print(f"welcome to ticTacToe! Current turn is player {game.turn}'s")
+            print(game)
+            player = int(input("Please enter which player you are, 1 or 2!"))
+            posX = int(input(f"Please enter the X Position that player {player} wishes to play at :"))
+            posY = int(input("Thank you! now please enter the Y Position! :"))
+            game.takeTurn(player, posX, posY)
+        except ValueError as e:
+            print("invalid move! Please try again.")
+        except GameEndException as e:
+            print("Game over!")
+            if e == 0:
+                print("Game ended in a tie!")
+                return 0
+            else:
+                print(f"Player {e} wins!")
+                return e
+
+            
+            
     
     
     
