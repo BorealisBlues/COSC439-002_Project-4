@@ -39,7 +39,7 @@ class TicTacToe:
     
     def checkValidMove(self, posX:int, posY:int) -> bool:
         """check if the space is taken for attempted move -Ben"""
-        if self.__board[posY][posX] != 0:
+        if self.__board[posX][posY] != 0:
             return False
         else:
             return True
