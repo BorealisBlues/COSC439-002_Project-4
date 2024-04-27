@@ -1,5 +1,10 @@
 #Class definition for internal game logic
 
+#TODO:
+# -A    Please add requests for specific functions or clarification of functions here while we are in development
+# -A    Need to add some sort of reset_board function to be called by ther GUI i think
+# -A    Need to add an update_State function that accepts a 2d array and compares it to current
+#       Board state for sync over network connection
 class GameEndException(Exception):
     """To be raised upon game win with int value 0 for Tie, 1 for player 1 victory, 2 for player 2 victory """ 
 
@@ -97,7 +102,11 @@ class TicTacToe:
         else: return False
 
     def checkTie(self, posX:int, posY:int) -> bool:
-        """checks for a tie condition - Ben"""
+        """checks for a tie condition - Ben
+        Args:
+            PosX:int : X position of current move
+            posY:int : Y position of current move
+        """
         if 0 not in (item for sublist in self.__board for item in sublist) and not self.checkWin(posX, posY):
             return True
         else:

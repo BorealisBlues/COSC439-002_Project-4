@@ -6,6 +6,7 @@ from tkinter import font
 from typing import NamedTuple
 
 from TicTacToe import TicTacToe
+from TicTacToe import GameEndException #custom exception for end of game -Andromeda
 
 
 class Player(NamedTuple):
@@ -72,21 +73,36 @@ class TicTacToeBoard(tk.Tk):
         """Handle a player's move."""
         clicked_btn = event.widget
         row, col = self._cells[clicked_btn]
-        player = self._game.turn
-        if self._game.checkValidMove(row, col):
-            self._update_button(clicked_btn)
-            self._game.takeTurn(player, row, col)
-            if self._game.checkTie(row, col):
+        player = self._game.turn #i assume this line will be taken changed when we get the netcode in pace
+        #if self._game.checkValidMove(row, col): #The function takeTurn(posX, posY) automatically calls for check
+        self._update_button(clicked_btn)         #Valid move now, so this if statment *should* be unnescessary -Andromeda
+        try: #adding try/except block for new exception-based game-end condition
+            self._game.takeTurn(player, row, col) 
+        except ValueError as e: #ValueError gets raised if A) not the current player's move or B) space is already occupied
+            self._update_display("Invalid move!")
+        except GameEndException as e:
+            if(e == 0):
                 self._update_display(msg="Tied game!", color="red")
-            elif self._game.checkWin(row, col):
-                # self._highlight_cells()
+            else:
                 msg = f'Player "{self._game.turn}" won!'
                 color = PLAYERS[self._game.turn - 1].color
                 self._update_display(msg, color)
-            else:
-                self._game.changeTurn()
-                msg = f"{self._game.turn}'s turn"
-                self._update_display(msg)
+        else: #this else statement runs in the event of no exception during the try block
+            msg = f"{self._game.turn}'s turn"
+            self._update_display(msg)
+            # if self._game.checkTie(row, col):     #Pretty sure this whole block can be removed, but im gonna leave it in
+            #     self._update_display(msg="Tied game!", color="red")   #comment style for now in case i missed some game
+                                                                        #critical logic
+            # elif self._game.checkWin(row, col):
+            #     # self._highlight_cells()
+            #     msg = f'Player "{self._game.turn}" won!'
+            #     color = PLAYERS[self._game.turn - 1].color
+            #     self._update_display(msg, color)
+            # else:
+            #     # self._game.changeTurn() # this is the line that caused the infinite player 1 turn loop,
+            #     # a call to changeTurn() is made automatically as part of the call to takeTurn()
+            #     msg = f"{self._game.turn}'s turn"
+            #     self._update_display(msg)
 
     def _update_button(self, clicked_btn):
         clicked_btn.config(text=PLAYERS[self._game.turn - 1].label)
@@ -103,9 +119,15 @@ class TicTacToeBoard(tk.Tk):
 
     def reset_board(self):
         """Reset the game's board to play again."""
-        self._game.reset_game()
+        self._game.reset_game() # will impliment this function -Andromeda
         self._update_display(msg="Ready?")
         for button in self._cells.keys():
             button.config(highlightbackground="lightblue")
             button.config(text="")
             button.config(fg="black")
+            
+
+if __name__ == "__main__": #added for ability to just, directly run this file for testing
+    game = TicTacToe()
+    board = TicTacToeBoard(game)
+    board.mainloop()
