@@ -1,5 +1,6 @@
 import socket
 from threading import Thread
+from TicTacToe import TicTacToe
 
 class TicTacToeServer:
     def __init__(self):

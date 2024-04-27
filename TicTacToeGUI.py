@@ -81,7 +81,7 @@ class TicTacToeBoard(tk.Tk):
         except ValueError as e: #ValueError gets raised if A) not the current player's move or B) space is already occupied
             self._update_display("Invalid move!")
         except GameEndException as e:
-            if(e == 0):
+            if(str(e) == "0"):
                 self._update_display(msg="Tied game!", color="red")
             else:
                 msg = f'Player "{self._game.turn}" won!'

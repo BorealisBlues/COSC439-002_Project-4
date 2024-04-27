@@ -3,16 +3,12 @@
 #TODO:
 # -A    Please add requests for specific functions or clarification of functions here while we are in development
 # -A    Need to add some sort of reset_board function to be called by ther GUI i think
-# -A    Need to add an update_State function that accepts a 2d array and compares it to current
-#       Board state for sync over network connection
 class GameEndException(Exception):
     """To be raised upon game win with int value 0 for Tie, 1 for player 1 victory, 2 for player 2 victory """ 
 
 class TicTacToe:
-    """class representing the actual game
-    """
-    
-    
+    """class representing the actual game"""   
+     
     def __init__(self, length:int=3, width:int=3):
         """Constructor function
 
@@ -24,8 +20,7 @@ class TicTacToe:
         self.turn = 1 # tracks which player's turn it is, starting with player 1
         self.__initializeBoard(length, width)
     
-
-    def getBoardState(self) -> list:
+    def getBoardState(self) -> list[list]:
         """function to get the state of the board for display or transmission
 
         Returns:
@@ -35,6 +30,23 @@ class TicTacToe:
         """
         return self.__board
 
+    def updateBoardState(self, newboardState:list[list]):
+        """function to be called upon reception of new board state to synchronize between players
+
+        Args:
+            NewboardState (list[list]): 2 dimensional list representing new board state
+        """
+        #first check to make sure that the arrays are of equal size, which, shouldn't be an issue, but yk
+        #input validation and all
+        if (len(newboardState) == len(self.__board) and len(newboardState[0]) == len(self.__board[0])):
+            print("Current Board State: " + str(self))
+            for y in range(self.getBoardSize):
+                for x in range(self.getBoardSize):
+                    self.__board[y][x] = newboardState[y][x]
+            print("New Board State: " + str(self))
+        else:
+            raise ValueError("new array does not match dimension of existing board!")
+
     def getBoardSize(self) -> int:
         """returns the size of the board - Ben"""
         return len(self.__board)
@@ -43,7 +55,7 @@ class TicTacToe:
         '''Initializes a multidimensional array for tracking moves by each player, allows for variable board size'''
         self.__board = [[0 for j in range(width)] for i in range(length)]
     
-    def checkValidMove(self, posX:int, posY:int) -> bool:
+    def __checkValidMove(self, posX:int, posY:int) -> bool: #mangling this name too
         """check if the space is taken for attempted move -Ben"""
         if self.__board[posY][posX] != 0: #Swapped for intuitive display and storage, even if it leads to unintuitive access
             return False
@@ -65,7 +77,7 @@ class TicTacToe:
             posY (int): vertical position in the board where the player is playing
         """
         if(self.turn == player): # check if it is the players turn
-            if self.checkValidMove(posX, posY):
+            if self.__checkValidMove(posX, posY):
                 self.__board[posY][posX] = player #Y and X are swapped for consistent and intuitive display,
                                                   #even if it reads a little unintuitively
             else:
@@ -75,12 +87,12 @@ class TicTacToe:
         
         if self.checkWin(posX, posY):
             raise GameEndException(self.turn)
-        elif self.checkTie(posX, posY):
+        elif self.__checkTie(posX, posY):
             raise GameEndException(0)
         else:   
-            self.changeTurn()
+            self.__changeTurn()
         
-    def changeTurn(self):
+    def __changeTurn(self): #changed to a mangled name to indicate use only internally
         """changes which player's turn it is
         """
         if(self.turn == 1):
@@ -88,7 +100,8 @@ class TicTacToe:
         else: self.turn = 1
         
     def checkWin(self, posX:int, posY:int) -> bool:
-        """Checks if the board is in a winning state, raises ??? something, not sure what yet
+        """Checks if the board is in a winning state,
+           intended for internal use only but left unmangled for edge cases
         
         Args:
             posX (int): horizontal position just played at
@@ -101,7 +114,7 @@ class TicTacToe:
             return True
         else: return False
 
-    def checkTie(self, posX:int, posY:int) -> bool:
+    def __checkTie(self, posX:int, posY:int) -> bool: #changed to a mangled name to indicate use only internally
         """checks for a tie condition - Ben
         Args:
             PosX:int : X position of current move
@@ -188,9 +201,20 @@ class TicTacToe:
             boardasString += "\n"
         return boardasString
             
-            
+    def reset_game(self):
+        """Resets all entries in the board to 0 (representing empty) values
         
-def testGame():
+        Calls internal function __initializeBoard to do so
+        """
+        self.__initializeBoard(len(self.__board), len(self.__board[0])) #makes a call to the board initialization
+        # this should result in a reset of the board state
+        
+def testGame() -> int:
+    """Pure CLI testing for internal game logic
+
+    Returns:
+        _type_: 1, 2, or 0 depending on player 1 victory, player 2 victory, or tie respectively
+    """
     game = TicTacToe()
     while(True):
         try:
@@ -204,19 +228,12 @@ def testGame():
             print("invalid move! Please try again.")
         except GameEndException as e:
             print("Game over!")
-            if e == 0:
+            if str(e) == "0":
                 print("Game ended in a tie!")
                 return 0
             else:
                 print(f"Player {e} wins!")
                 return e
-
-            
-            
     
-    
-    
-    
-        
 if __name__ == "__main__":
     testGame()
