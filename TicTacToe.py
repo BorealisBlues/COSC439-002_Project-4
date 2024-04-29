@@ -201,7 +201,7 @@ class TicTacToe:
             boardasString += "\n"
         return boardasString
             
-    def reset_game(self):
+    def resetGame(self): #renamed function for internal consistency
         """Resets all entries in the board to 0 (representing empty) values
         
         Calls internal function __initializeBoard to do so

@@ -119,7 +119,7 @@ class TicTacToeBoard(tk.Tk):
 
     def reset_board(self):
         """Reset the game's board to play again."""
-        self._game.reset_game() # will impliment this function -Andromeda
+        self._game.resetGame() # this function has been implimented, name changed slightly for internal consistency
         self._update_display(msg="Ready?")
         for button in self._cells.keys():
             button.config(highlightbackground="lightblue")
