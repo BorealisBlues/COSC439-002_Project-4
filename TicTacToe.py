@@ -2,7 +2,7 @@
 
 #TODO:
 # -A    Please add requests for specific functions or clarification of functions here while we are in development
-# -A    Need to add some sort of reset_board function to be called by ther GUI i think
+# 
 class GameEndException(Exception):
     """To be raised upon game win with int value 0 for Tie, 1 for player 1 victory, 2 for player 2 victory """ 
 
@@ -39,11 +39,11 @@ class TicTacToe:
         #first check to make sure that the arrays are of equal size, which, shouldn't be an issue, but yk
         #input validation and all
         if (len(newboardState) == len(self.__board) and len(newboardState[0]) == len(self.__board[0])):
-            print("Current Board State: " + str(self))
-            for y in range(self.getBoardSize):
-                for x in range(self.getBoardSize):
+            print("Current Board State: \n" + str(self))
+            for y in range(self.getBoardSize()):
+                for x in range(self.getBoardSize()):
                     self.__board[y][x] = newboardState[y][x]
-            print("New Board State: " + str(self))
+            print("New Board State: \n" + str(self))
         else:
             raise ValueError("new array does not match dimension of existing board!")
 
@@ -171,14 +171,17 @@ class TicTacToe:
             
             #first we check from top left to bottom right
             for i in range(len(self.__board)):
+                if vicTLeftToBRight == False: break #short circut to slightly improve runtime
                 if not (self.__board[i][i] == self.turn): # if the spot does not belong to the player
                     vicTLeftToBRight = False # the player does not have this victory
             
             #then we check if from top right to bottom left
-            for x in reversed(range((len(self.__board)))): #iterating backwards (from right to left)
+            for x in range(len(self.__board)): #iterating normal style
+                if vicTRightToBLeft == False: break #short circut to slightly improve runtime
                 for y in range(len(self.__board)): #iterating normal style, top to bottom
-                    if (x == y): #if we are along a diagonal
-                        if not (self.__board[x][y] == self.turn): #if the spot does not belong to the player
+                    if vicTRightToBLeft == False: break #short circut to slightly improve runtime
+                    if ((y+x) == (len(self.__board) - 1)): #if we are along a / type diagonal
+                        if not (self.__board[y][x] == self.turn): #if the spot does not belong to the player
                             vicTRightToBLeft = False #player does not have this victory
             
             if(vicTRightToBLeft or vicTLeftToBRight): #if player has either subtype of victory
@@ -206,6 +209,7 @@ class TicTacToe:
         
         Calls internal function __initializeBoard to do so
         """
+        self.turn = 1
         self.__initializeBoard(len(self.__board), len(self.__board[0])) #makes a call to the board initialization
         # this should result in a reset of the board state
         
@@ -213,7 +217,7 @@ def testGame() -> int:
     """Pure CLI testing for internal game logic
 
     Returns:
-        _type_: 1, 2, or 0 depending on player 1 victory, player 2 victory, or tie respectively
+        int: 1, 2, or 0 depending on player 1 victory, player 2 victory, or tie respectively
     """
     game = TicTacToe()
     while(True):
@@ -235,5 +239,43 @@ def testGame() -> int:
                 print(f"Player {e} wins!")
                 return e
     
+    
+def testDiag() -> int:
+    """fucntion to test diagonal win check cases 
+
+    Returns:
+        int: 1, 2, or 0 depending on player 1 victory, player 2 victory, or tie respectively
+    """
+    
+    LtoRState = [[1, 2, 0],
+                 [2, 1, 2],
+                 [2, 2, 0]]
+    
+    RtoLState = [[2, 1, 1],
+                 [2, 1, 0],
+                 [0, 2, 2]]
+    
+    game = TicTacToe()
+    game.updateBoardState(LtoRState) #put game into state where LtoRDiag victory should be triggered
+    try:
+        game.takeTurn(1, 2, 2)
+        print("turn taken! New board State: \n", game)
+    except GameEndException as e:
+        print(f"game ended! Victory to player {e}")
+    else:
+        print("LtoR Diagonal test failed, victory not detected")
+    finally:
+        game.resetGame()
+        game.updateBoardState(RtoLState)
+        try:
+            game.takeTurn(1, 0, 2)
+            print("turn taken! New board State:\n", game)
+        except GameEndException as e:
+            print(f"game ended! Victory to player {e}")
+        else:
+            print("RtoL Diagonal test failed, victory not detected")
+            
+   
 if __name__ == "__main__":
-    testGame()
+    #testGame()
+    testDiag()
