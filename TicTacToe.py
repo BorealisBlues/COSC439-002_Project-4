@@ -3,6 +3,7 @@
 #TODO:
 # -A    Please add requests for specific functions or clarification of functions here while we are in development
 # 
+from connections import formalConnectionInterface
 class GameEndException(Exception):
     """To be raised upon game win with int value 0 for Tie, 1 for player 1 victory, 2 for player 2 victory """ 
 
@@ -13,6 +14,7 @@ class TicTacToe:
         """Constructor function
 
         Args:
+            connection (formalConnectionInterface) a connection that impliments the function sendNewState()
             length (int): the length of the board, default 3
             width (int): the width of the board, default 3
         """
@@ -20,6 +22,9 @@ class TicTacToe:
         self.turn = 1 # tracks which player's turn it is, starting with player 1
         self.__initializeBoard(length, width)
     
+    def setConnection(self, connection:formalConnectionInterface):
+        self.connection = connection
+        
     def getBoardState(self) -> list[list]:
         """function to get the state of the board for display or transmission
 
@@ -50,7 +55,7 @@ class TicTacToe:
     def getBoardSize(self) -> int:
         """returns the size of the board - Ben"""
         return len(self.__board)
-
+    
     def __initializeBoard(self, length:int, width:int):
         '''Initializes a multidimensional array for tracking moves by each player, allows for variable board size'''
         self.__board = [[0 for j in range(width)] for i in range(length)]
@@ -91,6 +96,7 @@ class TicTacToe:
             raise GameEndException(0)
         else:   
             self.__changeTurn()
+            self.connection.sendNewState(self.getBoardState) 
         
     def __changeTurn(self): #changed to a mangled name to indicate use only internally
         """changes which player's turn it is

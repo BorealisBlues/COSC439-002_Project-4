@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter import ttk
 import tkinter as tk
 from itertools import cycle
 from tkinter import font
@@ -90,19 +89,6 @@ class TicTacToeBoard(tk.Tk):
         else: #this else statement runs in the event of no exception during the try block
             msg = f"{self._game.turn}'s turn"
             self._update_display(msg)
-            # if self._game.checkTie(row, col):     #Pretty sure this whole block can be removed, but im gonna leave it in
-            #     self._update_display(msg="Tied game!", color="red")   #comment style for now in case i missed some game
-                                                                        #critical logic
-            # elif self._game.checkWin(row, col):
-            #     # self._highlight_cells()
-            #     msg = f'Player "{self._game.turn}" won!'
-            #     color = PLAYERS[self._game.turn - 1].color
-            #     self._update_display(msg, color)
-            # else:
-            #     # self._game.changeTurn() # this is the line that caused the infinite player 1 turn loop,
-            #     # a call to changeTurn() is made automatically as part of the call to takeTurn()
-            #     msg = f"{self._game.turn}'s turn"
-            #     self._update_display(msg)
 
     def _update_button(self, clicked_btn):
         clicked_btn.config(text=PLAYERS[self._game.turn - 1].label)
