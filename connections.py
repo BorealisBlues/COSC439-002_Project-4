@@ -44,11 +44,7 @@ class TicTacToeServer(formalConnectionInterface):
                     break
                 # Decode the message
                 newBoardState = self.__bytesToBoardState(data)
-                self.game.updateBoardState(newBoardState) #new board state gets updated
-                if self.game.turn == 1:
-                    self.game.turn == 2
-                else:
-                    self.game.turn == 1
+                self.game.updateBoardState(newBoardState) #new board state gets updated, also changes the turn
             except Exception as e:
                 print(f"Error: {e}")
                 break

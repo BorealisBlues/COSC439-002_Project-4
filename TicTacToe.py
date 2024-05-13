@@ -43,14 +43,50 @@ class TicTacToe:
         """
         #first check to make sure that the arrays are of equal size, which, shouldn't be an issue, but yk
         #input validation and all
+        
         if (len(newboardState) == len(self.__board) and len(newboardState[0]) == len(self.__board[0])):
             print("Current Board State: \n" + str(self))
+            #we find the spot where the new move was made
+            x, y = self.__findDiffBtwnNewAndOldBoards(newboardState)
+            if ((x == -1) or (y == -1)): #condition for if no change was found
+                return # if no change, return 
             for y in range(self.getBoardSize()):
                 for x in range(self.getBoardSize()):
                     self.__board[y][x] = newboardState[y][x]
             print("New Board State: \n" + str(self))
         else:
             raise ValueError("new array does not match dimension of existing board!")
+        if self.turn == 1:
+            self.checkWin(x, y, 2) #check to see if new board has a win condition present
+        else:
+            self.checkWin(x, y, 1) #2nd check, to ensure that correct player is reported as having won
+        self.__changeTurn() #change turn after doing everything else
+    
+    def __findDiffBtwnNewAndOldBoards(self, newBoard:list[list[int]]) -> tuple[int, int]:
+        """Helper function to compare two 2d arrays (rep board state) and locate index of difference
+
+        Args:
+            newBoard (list[list[int]]): the new board to be checked
+
+        Raises:
+            ValueError: Raised if there is more than one difference between current and new state
+
+        Returns:
+            tuple[int, int]: (X,Y) tuple pair representing location of discovered difference
+        """
+        foundX = -1
+        foundY = -1
+        for x in range(len(self.__board)):
+            for y in range(len(self.__board)):
+                if not (self.__board[y][x] == newBoard[y][x]):
+                    if(foundX == -1 and foundY == -1):
+                        #checks to make sure we haven't already found a difference in the boards
+                        #there should only ever be one difference, so its an error checking thing
+                        foundX = x
+                        foundY = y
+                    else:
+                        raise ValueError("More than one change between current board state and neew board state !!!")
+        return (foundX, foundY)
 
     def getBoardSize(self) -> int:
         """returns the size of the board - Ben"""
@@ -90,11 +126,7 @@ class TicTacToe:
         else:
             raise ValueError(f"It is player {self.turn}'s turn! not player {player}'s!")
         
-        if self.checkWin(posX, posY):
-            raise GameEndException(self.turn)
-        elif self.__checkTie(posX, posY):
-            raise GameEndException(0)
-        else:   
+        if not (self.checkWin(posX, posY)):   
             self.__changeTurn()
             self.connection.sendNewState(self.getBoardState()) 
         
@@ -105,7 +137,7 @@ class TicTacToe:
             self.turn = 2
         else: self.turn = 1
         
-    def checkWin(self, posX:int, posY:int) -> bool:
+    def checkWin(self, posX:int, posY:int, checkTurn:int=0) -> Exception:
         """Checks if the board is in a winning state,
            intended for internal use only but left unmangled for edge cases
         
@@ -115,10 +147,14 @@ class TicTacToe:
         Returns:
             bool: whether or not there is a victory for the player whose turn it is
         """
+        if checkTurn == 0:
+            #if turn is unspecified
+            checkTurn = self.turn
         if(self.__checkWinRow(posX) or self.__checkWinColumn(posY) or self.__checkWinDiagonal()):
             #if any of the 3 possible win conditions are true then return True
-            return True
-        else: return False
+            raise GameEndException(checkTurn)
+        elif self.__checkTie:
+            raise GameEndException(0)
 
     def __checkTie(self, posX:int, posY:int) -> bool: #changed to a mangled name to indicate use only internally
         """checks for a tie condition - Ben
