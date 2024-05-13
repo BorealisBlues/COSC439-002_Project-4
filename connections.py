@@ -2,7 +2,6 @@ import abc #builtin library allowing for interface creation
 
 import socket
 from threading import Thread
-from TicTacToe import TicTacToe
 
 ## interface class to try and standardize the method calls to both Client and Server objects
 
@@ -22,7 +21,7 @@ class formalConnectionInterface(metaclass=abc.ABCMeta):
         raise NotImplementedError #if this function is overwritten, the exception will not occur
 
 class TicTacToeServer(formalConnectionInterface):
-    def __init__(self, game:TicTacToe):
+    def __init__(self, game):
         # Create a TCP socket for the server
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Bind the socket to localhost and port 9999
@@ -31,7 +30,7 @@ class TicTacToeServer(formalConnectionInterface):
         self.server_socket.listen(1)
         # Dictionary to store player sockets
         # server should be passed an instance of the game to have access, AND the game must be passed a reference to the server
-        self.game = game()
+        self.game = game
         self.players = []
         game.setConnection(self) #boy i hope this works
 
@@ -58,7 +57,7 @@ class TicTacToeServer(formalConnectionInterface):
         print(f"remote player! disconnected")
         clientConnection.close()
 
-    def sendNewState(self, boardState:list[list]):
+    def sendNewState(self, boardState:list[list[int]]):
         """sends updated board state to players
         
         Overwrites formalConnectionInterface.sendNewState()
@@ -69,10 +68,10 @@ class TicTacToeServer(formalConnectionInterface):
         # sends out the new board state and current turn value to all players
         # Send a message to all connected players
         bytestate = self.__boardStateToBytes(boardState)
-        for player_socket in self.players.values():
+        for player_socket in self.players:
             player_socket.sendall(bytestate)
             
-    def __boardStateToBytes(boardState:list[list]) -> bytearray:
+    def __boardStateToBytes(self, newBoardState:list[list[int]]) -> bytearray:
         """converts the 2d int list of BoardState to a single Bytes object
 
         Args:
@@ -82,13 +81,13 @@ class TicTacToeServer(formalConnectionInterface):
             bytearray: representation of board object as Bytes object
         """
         byte = bytearray()
-        for listY in boardState:
+        for listY in newBoardState:
             for intX in listY:
-                byte.join(bytearray(intX))
-            byte.join(-1) # value of -1 used to indicate line break
+                byte.append(intX)
+            byte.append(3) # value of 3 used to indicate line break
         return byte
     
-    def __bytesToBoardState(byte:bytearray) -> list[list]:
+    def __bytesToBoardState(self, byte:bytearray) -> list[list[int]]:
         """converts from recieved bytes to 2d intarray
 
         Args:
@@ -102,7 +101,7 @@ class TicTacToeServer(formalConnectionInterface):
         y = 0 
         x = 0
         for bit in byte:
-            if (bit == -1):
+            if (bit == 3):
                 y += 1
             else:
                 newBoardState[y][x] = bit 
@@ -120,7 +119,7 @@ class TicTacToeServer(formalConnectionInterface):
             Thread(target=self.handle_client, args=(clientConnection, player_id)).start()
 
 class TicTacToeClient(formalConnectionInterface):
-    def __init__(self, hostIP, portNum, game:TicTacToe):
+    def __init__(self, hostIP, portNum, game):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((hostIP, portNum))
         self.game = game
@@ -132,7 +131,7 @@ class TicTacToeClient(formalConnectionInterface):
         thread.daemon = True
         thread.start()
         
-    def __bytesToBoardState(byte:bytearray) -> list[list]:
+    def __bytesToBoardState(self, byte:bytearray) -> list[list[int]]:
         """converts from recieved bytes to 2d intarray
 
         Args:
@@ -146,14 +145,14 @@ class TicTacToeClient(formalConnectionInterface):
         y = 0 
         x = 0
         for bit in byte:
-            if (bit == -1):
+            if (bit == 3):
                 y += 1
             else:
                 newBoardState[y][x] = bit 
                 x += 1
         return newBoardState
     
-    def __boardStateToBytes(boardState:list[list]) -> bytearray:
+    def __boardStateToBytes(self, newBoardState:list[list[int]]) -> bytearray:
         """converts the 2d int list of BoardState to a single Bytes object
 
         Args:
@@ -163,10 +162,10 @@ class TicTacToeClient(formalConnectionInterface):
             bytearray: representation of board object as Bytes object
         """
         byte = bytearray()
-        for listY in boardState:
+        for listY in newBoardState:
             for intX in listY:
-                byte.join(bytearray(intX))
-            byte.join(-1) # value of -1 used to indicate line break
+                byte.append(intX)
+            byte.append(3) # value of 3 used to indicate line break
         return byte
     
     def recieveData(self):
@@ -187,7 +186,7 @@ class TicTacToeClient(formalConnectionInterface):
                 print(f"Error: {e}")
                 break
             
-    def sendNewState(self, boardState:list[list]):
+    def sendNewState(self, boardState:list[list[int]]):
         """sends updated board state to players
             
         Overwrites formalConnectionInterface.sendNewState()

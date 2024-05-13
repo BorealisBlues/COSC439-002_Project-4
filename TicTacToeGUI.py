@@ -20,7 +20,7 @@ PLAYERS = (
 
 
 class TicTacToeBoard(tk.Tk):
-    def __init__(self, game):
+    def __init__(self, game:TicTacToe):
         super().__init__()
         self.title("Tic-Tac-Toe Game")
         self._cells = {}

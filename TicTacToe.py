@@ -96,7 +96,7 @@ class TicTacToe:
             raise GameEndException(0)
         else:   
             self.__changeTurn()
-            self.connection.sendNewState(self.getBoardState) 
+            self.connection.sendNewState(self.getBoardState()) 
         
     def __changeTurn(self): #changed to a mangled name to indicate use only internally
         """changes which player's turn it is
@@ -218,6 +218,7 @@ class TicTacToe:
         self.turn = 1
         self.__initializeBoard(len(self.__board), len(self.__board[0])) #makes a call to the board initialization
         # this should result in a reset of the board state
+   
         
 def testGame() -> int:
     """Pure CLI testing for internal game logic
@@ -243,8 +244,7 @@ def testGame() -> int:
                 return 0
             else:
                 print(f"Player {e} wins!")
-                return e
-    
+                return e 
     
 def testDiag() -> int:
     """fucntion to test diagonal win check cases 
