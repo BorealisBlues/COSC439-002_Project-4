@@ -34,7 +34,7 @@ class TicTacToeServer(formalConnectionInterface):
         self.players = []
         game.setConnection(self) #boy i hope this works
 
-    def handle_client(self, clientConnection, player_id):
+    def handle_client(self, clientConnection):
         # Handle messages from a single client
         while True:
             try:
@@ -112,7 +112,7 @@ class TicTacToeServer(formalConnectionInterface):
             player_id = len(self.players) + 1
             self.players[player_id] = clientConnection
             # Create a new thread to handle the client
-            Thread(target=self.handle_client, args=(clientConnection, player_id)).start()
+            Thread(target=self.handle_client, args=(clientConnection)).start()
 
 class TicTacToeClient(formalConnectionInterface):
     def __init__(self, hostIP, portNum, game):
@@ -174,10 +174,6 @@ class TicTacToeClient(formalConnectionInterface):
                 # Decode the message
                 newBoardState = self.__bytesToBoardState(data)
                 self.game.updateBoardState(newBoardState) #new board state gets updated
-                if self.game.turn == 1:
-                    self.game.turn == 2
-                else:
-                    self.game.turn == 1
             except Exception as e:
                 print(f"Error: {e}")
                 break

@@ -317,7 +317,6 @@ def testDiag() -> int:
         else:
             print("RtoL Diagonal test failed, victory not detected")
             
-   
 if __name__ == "__main__":
     #testGame()
     testDiag()
