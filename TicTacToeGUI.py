@@ -5,7 +5,7 @@ from tkinter import font, ttk
 from typing import NamedTuple
 
 from TicTacToe import TicTacToe
-from TicTacToe import GameEndException  #custom exception for end of game -Andromeda
+from TicTacToe import GameEndException  # custom exception for end of game -Andromeda
 from connections import TicTacToeServer, TicTacToeClient
 
 
@@ -23,7 +23,7 @@ PLAYERS = (
 class TicTacToeBoard(tk.Tk):
     def __init__(self, game: TicTacToe):
         super().__init__()
-        self.title("LAN Tic-Tac-Toe Game")
+        self.title("Network Tic-Tac-Toe Game")
         self._cells = {}
         self._game = game
         self._create_menu()
@@ -34,6 +34,7 @@ class TicTacToeBoard(tk.Tk):
             "port": 9999
         }
 
+    #  Renders the initial screen for selecting player role
     def _create_initial_screen(self):
         self.init_frame = tk.Frame(master=self)
         self.init_frame.pack(expand=True, fill="both")
@@ -50,6 +51,7 @@ class TicTacToeBoard(tk.Tk):
         join_button = tk.Button(master=self.init_frame, text="Join", command=lambda: self._go_to_join_session())
         join_button.pack(padx=5, pady=5)
 
+    #  Renders top bar menu
     def _create_menu(self):
         menu_bar = tk.Menu(master=self)
         self.config(menu=menu_bar)
@@ -59,6 +61,7 @@ class TicTacToeBoard(tk.Tk):
         file_menu.add_command(label="Exit", command=quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
 
+    #  Renders page for inputting ip/port to join a game
     def _join_session(self):
         self.join_frame = tk.Frame(master=self)
         self.join_frame.pack(expand=True, fill="both")
@@ -70,17 +73,16 @@ class TicTacToeBoard(tk.Tk):
         join.pack()
         ip_text = tk.Label(master=self.join_frame, text="Enter host IP:")
         ip_text.pack()
-        # self.ip_string = StringVar()
         self.ip_entry = ttk.Entry(master=self.join_frame)
         self.ip_entry.pack()
         port_text = tk.Label(master=self.join_frame, text="Enter host port:")
         port_text.pack()
-        # self.port_string = StringVar()
         self.port_entry = ttk.Entry(master=self.join_frame)
         self.port_entry.pack()
         submit_button = tk.Button(master=self.join_frame, text="Submit", command=lambda: self._go_to_create_board_join())
         submit_button.pack(padx=5, pady=5)
 
+    #  Function to set up server/destroy initial page/create board
     def _go_to_create_board_host(self):
         self.isHost = True
         connection = TicTacToeServer(game=self._game)
@@ -88,11 +90,13 @@ class TicTacToeBoard(tk.Tk):
         self.init_frame.destroy()
         self._create_board_display()
 
+    #  Destroys initial page and creates join session page
     def _go_to_join_session(self):
         self.isHost = False
         self.init_frame.destroy()
         self._join_session()
 
+    #  Tries to join server, destroys join page, creates board
     def _go_to_create_board_join(self):
         self.ip_port["ip"] = self.ip_entry.get()
         self.ip_port["port"] = int(self.port_entry.get())
@@ -136,12 +140,12 @@ class TicTacToeBoard(tk.Tk):
         """Handle a player's move."""
         clicked_btn = event.widget
         row, col = self._cells[clicked_btn]
-        player = self._game.turn  #i assume this line will be taken changed when we get the netcode in pace
-        #if self._game.checkValidMove(row, col): #The function takeTurn(posX, posY) automatically calls for check
-        self._update_button(clicked_btn)  #Valid move now, so this if statment *should* be unnescessary -Andromeda
-        try:  #adding try/except block for new exception-based game-end condition
+        player = self._game.turn  # i assume this line will be taken changed when we get the netcode in pace
+        #if self._game.checkValidMove(row, col):  # The function takeTurn(posX, posY) automatically calls for check
+        self._update_button(clicked_btn)  # Valid move now, so this if statment *should* be unnescessary -Andromeda
+        try:  # adding try/except block for new exception-based game-end condition
             self._game.takeTurn(player, row, col)
-        except ValueError as e:  #ValueError gets raised if A) not the current player's move or B) space is already occupied
+        except ValueError as e:  # ValueError gets raised if A) not the current player's move or B) space is already occupied
             self._update_display("Invalid move!")
         except GameEndException as e:
             if (str(e) == "0"):
@@ -150,7 +154,7 @@ class TicTacToeBoard(tk.Tk):
                 msg = f'Player "{self._game.turn}" won!'
                 color = PLAYERS[self._game.turn - 1].color
                 self._update_display(msg, color)
-        else:  #this else statement runs in the event of no exception during the try block
+        else:  # this else statement runs in the event of no exception during the try block
             msg = f"{self._game.turn}'s turn"
             self._update_display(msg)
 
@@ -162,14 +166,9 @@ class TicTacToeBoard(tk.Tk):
         self.display["text"] = msg
         self.display["fg"] = color
 
-    # def _highlight_cells(self):
-    #     for button, coordinates in self._cells.items():
-    #         if coordinates in self._game.winner_combo:
-    #             button.config(highlightbackground="red")
-
     def reset_board(self):
         """Reset the game's board to play again."""
-        self._game.resetGame()  # this function has been implimented, name changed slightly for internal consistency
+        self._game.resetGame()
         self._update_display(msg="Ready?")
         for button in self._cells.keys():
             button.config(highlightbackground="lightblue")
@@ -183,7 +182,7 @@ class TicTacToeBoard(tk.Tk):
         return self.isHost
 
 
-if __name__ == "__main__":  #added for ability to just, directly run this file for testing
+if __name__ == "__main__":  # added for ability to directly run this file for testing
     game = TicTacToe()
     board = TicTacToeBoard(game)
     board.mainloop()

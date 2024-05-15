@@ -153,19 +153,9 @@ class TicTacToe:
         if(self.__checkWinRow(posX) or self.__checkWinColumn(posY) or self.__checkWinDiagonal()):
             #if any of the 3 possible win conditions are true then return True
             raise GameEndException(checkTurn)
-        elif self.__checkTie:
+        # Check for tie
+        elif 0 not in (item for sublist in self.__board for item in sublist):
             raise GameEndException(0)
-
-    def __checkTie(self, posX:int, posY:int) -> bool: #changed to a mangled name to indicate use only internally
-        """checks for a tie condition - Ben
-        Args:
-            PosX:int : X position of current move
-            posY:int : Y position of current move
-        """
-        if 0 not in (item for sublist in self.__board for item in sublist) and not self.checkWin(posX, posY):
-            return True
-        else:
-            return False
 
     def __checkWinRow(self, posX:int) -> bool:
         """checks if there is a row-based victory for the player whose turn it is
