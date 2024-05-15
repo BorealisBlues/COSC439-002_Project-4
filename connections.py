@@ -116,6 +116,7 @@ class TicTacToeServer(formalConnectionInterface):
 
 class TicTacToeClient(formalConnectionInterface):
     def __init__(self, hostIP, portNum, game):
+        self.receiveData = None  # I made this because it wasn't there but referenced in self.create_thread below
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((hostIP, portNum))
         self.game = game
